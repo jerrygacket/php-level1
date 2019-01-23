@@ -1,0 +1,280 @@
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/opensans.ttf");
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto-Black.ttf");
+}
+
+body {
+    background-color: #f8f8f8;
+    padding: 0;
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    color: #5e5e5e;
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 1100px;
+}
+
+/* начало оформление header */
+.header {
+    width: 100%;
+    height: 50px;
+    padding: 10px 0;
+    background-color: #006699;
+    background: url("../img/hbg1.png");
+    background-position: center;
+}
+
+.logo {
+    width: 50px;
+    height: 30px;
+    margin-left: 10px;
+    margin-top: 10px;
+    float: left;
+    background: url("../img/logo.png");
+    background-size: contain;
+    background-repeat: no-repeat
+}
+
+.companyName {
+  font-family: 'PT Sans', sans-serif;
+  float: left;
+  margin-left: 15px;
+  font-size: 22px;
+  line-height: 50px;
+  color: #fff;
+}
+
+.companyName a {
+  text-decoration:none;
+  color: #fff;
+}
+
+.info-block {
+    padding: 5px;
+    border: 1px solid #ccc;
+    background-color: white;
+    min-height: 150px;
+}
+
+/* начало оформление списка меню */
+.menu {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    height: 50px;
+    float: right;
+}
+
+.menu a {
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 0 10px;
+    height: 70px;
+    line-height: 70px;
+    display: block;
+}
+.menu a:last-child {
+  border-left: none;
+}
+
+.menu a:first-child {
+  border-right: none;
+}
+
+.menu a:hover {
+  background: #0099FF;
+}
+
+.menu a:active {
+  background: #99CCFF;
+    color: black;
+}
+/* конец оформление списка меню */
+/* конец оформление header */
+
+/* начало оформление footer */
+.footer {
+    width: 100%;
+    height: 50px;
+    padding: 10px 0;
+    background-color: #006699;
+    background: url("../img/hbg1.png");
+    background-position: center;
+}
+
+.footer p {
+    color: antiquewhite;
+    text-align: right;
+    margin-right: 20px;
+    margin-top: 20px;
+}
+
+/* конец оформление footer */
+
+/* начало оформление каталога */
+.catalog-row {
+    overflow: auto;
+}
+
+.catalog-item {
+    float: left;
+    width: 33.33333%;
+/*    display: flex;*/
+}
+
+.catalog-img {
+    text-align: center;
+}
+
+.product-link {
+    text-align: center;
+}
+
+.product-link a {
+    background-color: #006699;
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 10px 10px;
+    height: 70px;
+    line-height: 70px;
+}
+
+.product-link a:hover {
+  background: #0099FF;
+}
+
+.product-link a:active {
+  background: #99CCFF;
+    color: black;
+}
+/* конец оформление каталога */
+
+/* начало оформление карточки товара */
+.h2-prod {
+    color: black;
+    font-size: 18px;
+    font-weight: 400;
+    background: #eaeaea;
+    display: block;
+}
+
+.product-card {
+    overflow: auto;
+}
+
+.product-img {
+    padding: 4px;
+    background-color: blue;
+    float: left;
+    margin: auto 30px;
+}
+
+.product-img:hover {
+    background-color: inherit;
+}
+
+.product-button {
+    background-color: #006699;
+    border-radius: 4px;
+    border-color: #006699;
+    color: antiquewhite!important;
+    font-size: 1.3em!important;
+}
+
+.product-button:hover {
+    background: #0099FF;
+}
+
+.product-button:active {
+    background: #99CCFF;
+    color: black!important;
+}
+
+.product-intro {
+    color: #707070;
+    font-size: 14px;
+    font-style: italic;
+    line-height: 16px;
+}
+
+.product-options {
+    border: 1px solid black;
+    width: 400px;
+    height: 200px;
+    border-collapse: collapse;
+    
+}
+
+.product-options td {
+    border: 1px solid black;
+    font-size: 0.875em;
+    font-weight: 400; 
+    color: #606975;
+    padding-left: 10px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.product-options tr:first-child {
+    line-height: 10px;
+}
+
+.description:first-letter {
+    font-size: 40px;
+    font-family: 'Roboto', sans-serif;
+}
+/* конец оформление карточки товара */
+
+/* начало оформление страницы контактов */
+/* начало оформление формы контактов */
+.form-item {
+    width: 200px;
+    height: 45px;
+    font-size: 0.7em;
+    color: #ff6f61;
+}
+
+.form-item[type="file"] {
+    width: auto;
+    height: 25px;
+}
+
+.form-item[type="email"]:focus {
+    color: #000000;
+    border: 1px solid #000000;
+    background: #99CCFF;
+}
+
+.form-item[type="submit"],
+.form-item[type="reset"]
+{
+    width: auto;
+    height: 25px;
+    color: #484343;
+}
+
+.form-item textarea {
+    width: auto;
+    height: auto;
+}
+
+.all-caps {
+    text-transform: capitalize;
+}
+/* конец оформление формы контактов */
+/* конец оформление страницы контактов */
+
+a {/* оформление отдельных ссылок */
+    text-decoration: none;
+}
