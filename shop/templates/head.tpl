@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
     <meta charset="UTF-8">
-    <title><?php echo $title ?></title>
+    <title>{{SITE_TITLE}}</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>

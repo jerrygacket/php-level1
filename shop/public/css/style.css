@@ -134,6 +134,8 @@ body {
     float: left;
     width: 33.33333%;
 /*    display: flex;*/
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
 
 .catalog-img {
@@ -178,8 +180,6 @@ body {
 }
 
 .product-img {
-    padding: 4px;
-    background-color: blue;
     float: left;
     margin: auto 30px;
 }
