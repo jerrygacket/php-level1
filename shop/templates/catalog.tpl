@@ -3,36 +3,36 @@
         <div class="catalog-row">
            <div class="catalog-item">
                 <div class="catalog-img">
-                    <a href="index.php?pageName=product">
+                    <a href="?pagename=product">
                         <img src="img/product1.jpg" alt="Подушка большая" style="max-width:70px;">
                     </a>
                 </div>
                 <div class="product-link">
-                    <a href="index.php?pageName=product">
+                    <a href="?pagename=product">
                         Подушка большая
                     </a>
                 </div>
             </div>
             <div class="catalog-item">
                 <div class="catalog-img">
-                    <a href="index.php?pageName=product">
+                    <a href="?pagename=product">
                         <img src="img/product2.jpg" alt="Подушка большая" style="max-width:70px;">
                     </a>
                 </div>
                 <div class="product-link">
-                    <a href="index.php?pageName=product">
+                    <a href="?pagename=product">
                         Подушка маленька
                     </a>
                 </div>
             </div>
             <div class="catalog-item">
                 <div class="catalog-img">
-                    <a href="index.php?pageName=product">
+                    <a href="?pagename=product">
                         <img src="img/product3.jpg" alt="Подушка большая" style="max-width:70px;">
                     </a>
                 </div>
                 <div class="product-link">
-                    <a href="index.php?pageName=product">
+                    <a href="?pagename=product">
                         Подушка прямоуголная
                     </a>
                 </div>
