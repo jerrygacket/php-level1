@@ -34,7 +34,7 @@ function renderPage($page_name, $variables = [])
 
 function pasteValues($variables, $page_name, $templateContent){
     foreach ($variables as $key => $value) {
-        if ($value != null) {
+        if (isset($value)) {
             // собираем ключи
             $p_key = '{{' . strtoupper($key) . '}}';
 
@@ -67,11 +67,11 @@ function prepareVariables($page_name){
     $vars = [];
     switch ($page_name){
         case "news":
-            $vars["newsfeed"] = getNews();
+            $vars["newsfeed"] = getRow('news');
             $vars["test"] = 123;
             break;
         case "newspage":
-            $content = getNewsContent($_GET['id_news']);
+            $content = getItemContent('news', $_GET['id_news']);
             $vars["news_title"] = $content["news_title"];
             $vars["news_content"] = $content["news_content"];
             break;
@@ -79,11 +79,11 @@ function prepareVariables($page_name){
             if (isset($_POST['newfile'])) {
                 print_r(addImage());
             }
-            $vars["gallery"] = getImages();
+            $vars["gallery"] = getRow('gallery');
             $vars["pagetitle"] = 'Галерея картинок';
             break;
         case "image":
-            $content = getImageContent($_GET['image_id']);
+            $content = getItemContent('gallery', $_GET['image_id']);
             $vars["pagetitle"] = 'Картинка ' . $content['name'];
             $vars["name"] = $content['name'];
             $vars["description"] = $content['description'];
@@ -91,119 +91,131 @@ function prepareVariables($page_name){
             $vars["filesize"] = $content['filesize'];
             $vars["filepath"] = $content['filepath'];
             break;
+        case "calcs":
+            $vars["pagetitle"] = 'Калькуляторы';
+            $vars["result1"] = '';
+            $vars["result2"] = '';
+            $formNumber = (int) ($_POST['calcForm'] ?? '0');
+            $vars['result' . $formNumber] = calculateForm();
+            break;
+        case "catalog":
+            $vars["pagetitle"] = 'Каталог';
+            $vars["products"] = getRow('products');
+            break;
+        case "product":
+            if(isset($_POST['action'])) {
+                doFeedbackAction($_POST['action']);
+            }
+            $vars = getProductContent($_GET['productid']) ?? 'нет опций';
+            $vars["pagetitle"] = $vars['name'];
+            $vars["productid"] = $_GET['productid'];
+            $feedbacks = doFeedbackAction('read');
+            $vars["feedback"] = $feedbacks ?? 'нет отзывов';
+            break;
     }
     return $vars;
 }
 
-function _log($s, $suffix='')
-	{
-		if (is_array($s) || is_object($s)) $s = print_r($s, 1);
-		$s="### ".date("d.m.Y H:i:s")."\r\n".$s."\r\n\r\n\r\n";
+function getRow($tableName) { // собираем список (новостей, товаров. ккартинок и т.п.)
+    switch ($tableName) {
+        case 'news':
+            $sql = "SELECT id_news, news_title, news_preview FROM news";
+            break;
+        case 'gallery':
+            $sql = 'SELECT id,filepath,name,views FROM gallery ORDER BY views DESC';
+            break;
+        case 'products':
+            $sql = "SELECT * FROM products ORDER BY views DESC";
+            break;
+    }
 
-		if (mb_strlen($suffix))
-			$suffix = "_".$suffix;
-			
-		      _writeToFile($_SERVER['DOCUMENT_ROOT']."/_log/logs".$suffix.".log",$s,"a+");
+    return getAssocResult($sql);
+}
 
-		return $s;
-	}
+function getItemContent($tableName, $itemId) { // собираем отельный элемент (картинка, новость)
+    $itemId = (int)$itemId;
 
-function _writeToFile($fileName, $content, $mode="w")
-	{
-		$dir=mb_substr($fileName,0,strrpos($fileName,"/"));
-		if (!is_dir($dir))
-		{
-			_makeDir($dir);
-		}
+    $sql = 'SELECT * FROM ' . $tableName . ' WHERE id = '.$itemId;
+    $response = getAssocResult($sql);
 
-		if($mode != "r")
-		{
-			$fh=fopen($fileName, $mode);
-			if (fwrite($fh, $content))
-			{
-				fclose($fh);
-				@chmod($fileName, 0644);
-				return true;
-			}
-		}
+    $result = [];
+    if(isset($response[0])) {
+        $result = $response[0];
 
-		return false;
-	}
-
-function _makeDir($dir, $is_root = true, $root = '')
-        {
-            $dir = rtrim($dir, "/");
-            if (is_dir($dir)) return true;
-            if (mb_strlen($dir) <= mb_strlen($_SERVER['DOCUMENT_ROOT'])) 
-return true;
-            if (str_replace($_SERVER['DOCUMENT_ROOT'], "", $dir) == $dir) 
-return true;
-
-            if ($is_root)
-            {
-                $dir = str_replace($_SERVER['DOCUMENT_ROOT'], '', $dir);
-                $root = $_SERVER['DOCUMENT_ROOT'];
-            }
-            $dir_parts = explode("/", $dir);
-
-            foreach ($dir_parts as $step => $value)
-            {
-                if ($value != '')
-                {
-                    $root = $root . "/" . $value;
-                    if (!is_dir($root))
-                    {
-                        mkdir($root, 0755);
-                        chmod($root, 0755);
-                    }
-                }
-            }
-            return $root;
+        if (isset($result['views'])) {
+            $result['views']++;
+            $sql = 'UPDATE ' . $tableName . ' SET views = views + 1 WHERE id = '.$itemId;
+            executeQuery($sql);
         }
 
-function getNews(){
-    $sql = "SELECT id_news, news_title, news_preview FROM news";
-    $news = getAssocResult($sql);
-
-    return $news;
-}
-
-function getImages(){
-    $sql = 'SELECT id,filepath,name,views FROM gallery ORDER BY views DESC';
-    $images = getAssocResult($sql);
-
-    return $images;
-}
-
-function getNewsContent($id_news){
-    $id_news = (int)$id_news;
-
-    $sql = "SELECT * FROM news WHERE id_news = ".$id_news;
-    $news = getAssocResult($sql);
-
-    $result = [];
-    if(isset($news[0]))
-        $result = $news[0];
+    }
 
     return $result;
 }
 
-function getImageContent($image_id){
-    $image_id = (int)$image_id;
+function getProductContent($itemId) { // собираем товар. здесь идет джоин с таблицами опций
+    $itemId = (int) $itemId;
 
-    $sql = 'SELECT * FROM gallery WHERE id = ' . $image_id;
-    $images = getAssocResult($sql);
+    $sql = <<<SQL
+SELECT products.name,imgbig,img,intro,products.description,size,views,fabric.name as fabric,paint.name as paint FROM products 
+LEFT JOIN fabric ON fabric.id = products.fabricid
+LEFT JOIN paint ON paint.id = products.paintid
+WHERE products.id = "$itemId"
+SQL;
+
+    $response = getAssocResult($sql);
 
     $result = [];
-    if(isset($images[0])) {
-        $result = $images[0];
-        // увеличиваем число просмотров на 1 и сохраняем
-        $result['views']++;
-        $sql = 'UPDATE gallery SET views = \'' . ($result['views']) . '\' WHERE id = '.$image_id;
-        $response = executeQuery($sql);
-        print_r($response);
+    if(isset($response[0])) {
+        $result = $response[0];
+
+        if (isset($result['views'])) {
+            $result['views']++;
+            $sql = 'UPDATE products SET views = views + 1 WHERE id = '.$itemId;
+            executeQuery($sql);
+        }
     }
     return $result;
+}
+
+function doFeedbackAction(string $action) { // crud для фидбэков
+    switch ($action) {
+        case 'create':
+            $sql = 'INSERT INTO feedbacks (productid, header, comment, username, date, updated)'
+                .'VALUES ('
+                .'\''.sanitizeSQL($_POST['productid']).'\',' // вдруг кто-то поправит html или URI перед отправкой
+                .'\''.sanitizeSQL($_POST['header']).'\','
+                .'\''.sanitizeSQL($_POST['comment']).'\','
+                .'\''.sanitizeSQL($_POST['username']).'\','
+                .'\''.date('Y-m-d').'\','
+                .'\''.date('Y-m-d').'\')';
+            break;
+        case 'read':
+            if (isset($_GET['productid'])) {
+                $sql = 'SELECT * FROM feedbacks WHERE deleted=0 AND productid = '.$_GET['productid'];
+            } else {
+                $sql = 'SELECT * FROM feedbacks WHERE deleted=0';
+            }
+            break;
+        case 'update':
+            $sql = 'UPDATE feedbacks SET '
+                .'header=\''.sanitizeSQL($_POST['header']).'\','
+                .'comment=\''.sanitizeSQL($_POST['comment']).'\','
+                .'updated=\''.date('Y-m-d').'\''
+                .' WHERE id='.$_POST['feedbackid'];
+            break;
+        case 'delete':
+            print_r($_POST);
+            $sql = 'UPDATE feedbacks SET '
+                .'deleted=\'1\','
+                .'updated=\''.date('Y-m-d').'\''
+                .' WHERE id='.$_POST['feedbackid'];
+            break;
+        default:
+            return false;
+    }
+
+    return getAssocResult($sql);
 }
 
 function addImage(){
@@ -231,42 +243,3 @@ function fileUpload() {
     return move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile);
 }
 
-// получаем вложенный список рекурсивно
-// хедером для вложенного списка будет пункт из верхнего списка
-function getUlist($listHeader,$items) {
-    echo '<li>'.$listHeader.'</li>'.PHP_EOL;
-    echo '<ul>'.PHP_EOL;
-    foreach ($items as $key => $item) {
-        if (is_array($item)) {
-            getUlist($key, $item);
-        } else {
-            echo '<li>'.$key.': '.$item.'</li>'.PHP_EOL;
-        }
-    }
-    echo '</ul>'.PHP_EOL;
-}
-
-// строим галерею по файлам из произвольной папки
-//function getImages($imageDir) {
-//    if (!is_dir($imageDir)) {
-//        return 'Нет картинок';
-//    }
-//
-//    // убираем файлы . и ..
-//    $files = array_diff(scandir($imageDir), ['.', '..']);
-//
-//    $tpl = '';
-//    if (is_array($files) && !empty($files)) {
-//        foreach ($files as $imageFile) {
-//            $imagePath = $imageDir . DIRECTORY_SEPARATOR . $imageFile;
-//            if (file_exists($imagePath)) { // если файл доступен по полному пути
-//                $tpl .= '<div class=catalog-item">
-//                        <div class="catalog-img">
-//                            <a href="'.$imagePath.'" target="_blank"><img src="'.$imagePath.'" alt="Подушка декоративная большая" style="max-width: 100px;" class="product-img"></a>
-//                        </div>
-//                    </div>';
-//            }
-//        }
-//    }
-//    return ($tpl === '' ? 'Нет картинок' : $tpl);
-//}
