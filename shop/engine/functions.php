@@ -7,9 +7,9 @@ define('ERROR_TEMPLATE_EMPTY', 2);
 /*
 * Обрабатывает указанный шаблон, подставляя нужные переменные
 */
-function renderPage($page_name, $variables = [])
+function renderPage($pageName, $variables = [])
 {
-    $file = TPL_DIR . "/" . $page_name . ".tpl";
+    $file = TPL_DIR . "/" . $pageName . ".tpl";
 
     if (!is_file($file)) {
       	echo 'Template file "' . $file . '" not found';
@@ -26,7 +26,7 @@ function renderPage($page_name, $variables = [])
     $templateContent = file_get_contents($file);
     if (!empty($variables)) {
         // заполняем значениями
-        $templateContent = pasteValues($variables, $page_name, $templateContent);
+        $templateContent = pasteValues($variables, $pageName, $templateContent);
     }
 
     return $templateContent;
@@ -63,60 +63,31 @@ function pasteValues($variables, $page_name, $templateContent){
     return $templateContent;
 }
 
-function prepareVariables($page_name){
+function prepareVariables($urlArray = []){
+    $pageName = strtolower($urlArray[1] ?? 'index');
+    $pageGenerator = $pageName . 'Page';
     $vars = [];
-    switch ($page_name){
-        case "news":
-            $vars["newsfeed"] = getRow('news');
-            $vars["test"] = 123;
-            break;
-        case "newspage":
-            $content = getItemContent('news', $_GET['id_news']);
-            $vars["news_title"] = $content["news_title"];
-            $vars["news_content"] = $content["news_content"];
-            break;
-        case "gallery":
-            if (isset($_POST['newfile'])) {
-                print_r(addImage());
-            }
-            $vars["gallery"] = getRow('gallery');
-            $vars["pagetitle"] = 'Галерея картинок';
-            break;
-        case "image":
-            $content = getItemContent('gallery', $_GET['image_id']);
-            $vars["pagetitle"] = 'Картинка ' . $content['name'];
-            $vars["name"] = $content['name'];
-            $vars["description"] = $content['description'];
-            $vars["views"] = $content['views'];
-            $vars["filesize"] = $content['filesize'];
-            $vars["filepath"] = $content['filepath'];
-            break;
-        case "calcs":
-            $vars["pagetitle"] = 'Калькуляторы';
-            $vars["result1"] = '';
-            $vars["result2"] = '';
-            $formNumber = (int) ($_POST['calcForm'] ?? '0');
-            $vars['result' . $formNumber] = calculateForm();
-            break;
-        case "catalog":
-            $vars["pagetitle"] = 'Каталог';
-            $vars["products"] = getRow('products');
-            break;
-        case "product":
-            if(isset($_POST['action'])) {
-                doFeedbackAction($_POST['action']);
-            }
-            $vars = getProductContent($_GET['productid']) ?? 'нет опций';
-            $vars["pagetitle"] = $vars['name'];
-            $vars["productid"] = $_GET['productid'];
-            $feedbacks = doFeedbackAction('read');
-            $vars["feedback"] = $feedbacks ?? 'нет отзывов';
-            break;
+    if (is_callable($pageGenerator)) {
+        $vars = $pageGenerator($urlArray[2] ?? '');
     }
+    if (alreadyLoggedIn()) {
+        $vars['loginlink'] = 'logout';
+        $vars['logintext'] = 'Выход';
+        $vars['personmenu'] = 'person';
+    } else {
+        $vars['loginlink'] = 'login';
+        $vars['logintext'] = 'Вход';
+        $vars['personmenu'] = 'login';
+    }
+
+    if (!isset($vars['pagename'])) {
+        strlen($pageName) ? $vars['pagename'] = $pageName : $vars['pagename'] = 'index';
+    }
+
     return $vars;
 }
 
-function getRow($tableName) { // собираем список (новостей, товаров. ккартинок и т.п.)
+function getItemRow($tableName) { // собираем список (новостей, товаров. ккартинок и т.п.)
     switch ($tableName) {
         case 'news':
             $sql = "SELECT id_news, news_title, news_preview FROM news";
@@ -177,6 +148,7 @@ SQL;
     }
     return $result;
 }
+
 
 function doFeedbackAction(string $action) { // crud для фидбэков
     switch ($action) {
@@ -243,3 +215,26 @@ function fileUpload() {
     return move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile);
 }
 
+function getGoods() {
+    if (isset($_SESSION['goods'])) {
+        $goodsId = array_keys($_SESSION['goods']);
+        $idRange = implode(',', $goodsId);
+        $sql = <<<SQL
+SELECT
+  id
+  , name 
+  , imgsmall
+  , intro
+  , price
+FROM
+  products
+WHERE
+  id IN($idRange) 
+SQL;
+        $result = getAssocResult($sql);
+
+        return $result;
+    }
+
+    return 'Корзина пуста';
+}

@@ -1,6 +1,8 @@
-	<div class="container">
-        <h1>{{PAGETITLE}}</h1>
-        <div class="catalog-row">
-           {{PRODUCTS}}
-        </div>
-    </div>
+<section class="bg-gray-v2" id="pricing">
+	<div class="container text-center">
+		<div class="row">
+			{{PRODUCTS}}
+		</div> <!-- END row-->
+	</div>
+</div>
+</section>

@@ -11,6 +11,7 @@ define('TPL_DIR', SITE_ROOT . 'templates');
 define('GALLERY_DIR', WWW_ROOT . $ds . 'img');
 
 define('SITE_TITLE', 'Эксклюзивные подушки');
+define('SITE_URL', '/');
 
 /* DB config */
 define('HOST', 'localhost');
@@ -18,22 +19,12 @@ define('USER', 'maria');
 define('PASS', 'maria');
 define('DB', 'shop');
 
+define('SALT2', 'awOIHO@EN@Oine q2enq2kbkb');
+
 require_once(LIB_DIR . $ds . 'db.php');
 require_once(LIB_DIR . $ds . 'functions.php');
 require_once(LIB_DIR . $ds . 'calcFunc.php');
-
-$props = [
-    'Имя' => 'Продукт1',
-    'Вес' => '5 кг',
-    'Выбор цвета' => [
-        'Цвет1' => 'Синий',
-        'Цвет2' => 'Красный',
-        'Непонятный' => ['R' => '159', 'G' => '35', 'B' => '75'],
-    ],
-    'Длина' => '100 см',
-    'Выбор цвета еще раз' => [
-        'Цвет1' => 'Синий',
-        'Цвет2' => 'Красный',
-    ],
-    'Доставка' => '500 рублей',
-];
+require_once(LIB_DIR . $ds . 'pageGenerators.php');
+require_once(LIB_DIR . $ds . 'authFunc.php');
+//require_once(LIB_DIR . $ds . 'logger.php');
+require_once(LIB_DIR . $ds . 'cartFunc.php');
