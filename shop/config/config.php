@@ -18,8 +18,9 @@ define('USER', 'maria');
 define('PASS', 'maria');
 define('DB', 'shop');
 
-require_once(LIB_DIR . $ds . 'functions.php');
 require_once(LIB_DIR . $ds . 'db.php');
+require_once(LIB_DIR . $ds . 'functions.php');
+require_once(LIB_DIR . $ds . 'calcFunc.php');
 
 $props = [
     'Имя' => 'Продукт1',

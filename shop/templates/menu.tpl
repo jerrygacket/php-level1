@@ -6,6 +6,7 @@
 			<a href="/">Главная</a>
 			<a href="?pagename=catalog">Каталог</a>
 			<a href="?pagename=gallery">Галерея</a>
+			<a href="?pagename=calcs">Калькуляторы</a>
 			<a href="?pagename=contacts">Контакты</a>
 		</div>
 	</div>
