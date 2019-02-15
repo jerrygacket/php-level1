@@ -13,6 +13,14 @@ function getAssocResult($sql){
 	return $array_result;
 }
 
+function getTableRow($sql)
+{
+    $array_result = getAssocResult($sql);
+    $result = ($array_result[0] ?? []);
+
+    return $result;
+}
+
 function executeQuery($sql){
     $db = mysqli_connect(HOST, USER, PASS, DB);
 	$result = mysqli_query($db, $sql);
