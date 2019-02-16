@@ -9,7 +9,8 @@
        <div class="u-h-4 u-w-50 bg-primary rounded mt-4 u-mb-40 mx-auto"></div>
      </div>
    </div> <!--END row-->
-   
+   {{GOODSBUTTON}}
+   {{USERORDERS}}
    <div class="row mt-5">
     <div class="col-lg-4">
     	<div class="tabs tabs-v1 text-center">

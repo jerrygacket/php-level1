@@ -21,6 +21,11 @@ define('DB', 'shop');
 
 define('SALT2', 'awOIHO@EN@Oine q2enq2kbkb');
 
+define('ADMIN_ID', 1);
+define('ACTIONS', ['del'=>'удален', 'add'=>'добавлен']);
+define('STATUSES', ['del'=>'отменен', 'add'=>'новый']);
+define('ELEMENTS', ['order'=>'Заказ ', 'good'=>'Товар ']);
+
 require_once(LIB_DIR . $ds . 'db.php');
 require_once(LIB_DIR . $ds . 'functions.php');
 require_once(LIB_DIR . $ds . 'calcFunc.php');

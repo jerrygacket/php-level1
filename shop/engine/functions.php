@@ -73,7 +73,7 @@ function prepareVariables($urlArray = []){
     if (alreadyLoggedIn()) {
         $vars['loginlink'] = 'logout';
         $vars['logintext'] = 'Выход';
-        $vars['personmenu'] = 'person';
+        $vars['personmenu'] = (adminLoggedIn() ? 'admin' : 'person');
     } else {
         $vars['loginlink'] = 'login';
         $vars['logintext'] = 'Вход';
@@ -177,7 +177,6 @@ function doFeedbackAction(string $action) { // crud для фидбэков
                 .' WHERE id='.$_POST['feedbackid'];
             break;
         case 'delete':
-            print_r($_POST);
             $sql = 'UPDATE feedbacks SET '
                 .'deleted=\'1\','
                 .'updated=\''.date('Y-m-d').'\''
@@ -218,6 +217,7 @@ function fileUpload() {
 function getGoods() {
     if (isset($_SESSION['goods'])) {
         $goodsId = array_keys($_SESSION['goods']);
+        array_walk($goodsId, 'sanitizeArray');
         $idRange = implode(',', $goodsId);
         $sql = <<<SQL
 SELECT
@@ -237,4 +237,129 @@ SQL;
     }
 
     return 'Корзина пуста';
+}
+
+function doGetAction() {
+    $action = strtolower($_GET['action'] ?? '');
+    $cartFunction = $action . 'Cart';
+    if (is_callable($cartFunction)) {
+        if ($cartFunction()) {
+            $response = ['result' => 1, 'action' => $action, 'id' => $_GET['id_product']];
+        } else {
+            $response = [
+                'result' => 0,
+                'errorMessage' => 'ошибка работы с сессионными куками'
+            ];
+        }
+    } else {
+        $response = [
+            'result' => 0,
+            'errorMessage' => 'нет такой функции ' . $action
+        ];
+    }
+    echo json_encode($response);
+}
+
+function doPostAction() {
+    $action = strtolower($_POST['action'] ?? '');
+    $id = (int) $_POST['id'];
+    $postFunction = $action . ucwords(strtolower($_POST['element'] ?? ''));
+    if (is_callable($postFunction)) {
+        if ($postFunction(sanitizeSQL($id))) {
+            $response = [
+                'message' => ELEMENTS[strtolower($_POST['element'])] . ACTIONS[$action],
+                'newstatus' => STATUSES[$action],
+                'id' => $id,
+            ];
+        } else {
+            $response = [
+                'errorMessage' => 'ошибка работы с сессионными куками'
+            ];
+        }
+    } else {
+        $response = [
+            'result' => 0,
+            'errorMessage' => 'нет такой функции ' . $action
+        ];
+    }
+    echo json_encode($response);
+}
+
+function delOrder($id) {
+    $sql =<<<SQL
+UPDATE orders SET
+status='отменен'
+WHERE id=$id
+SQL;
+
+    $response = executeQuery($sql);
+
+    return $response;
+}
+
+function addOrder($id) {
+    $sql =<<<SQL
+UPDATE orders SET
+status='новый'
+WHERE id=$id
+SQL;
+
+    $response = executeQuery($sql);
+
+    return $response;
+}
+
+function delGood($id) {
+    $sql =<<<SQL
+UPDATE products SET
+status='удален'
+WHERE id=$id
+SQL;
+    $response = executeQuery($sql);
+
+    return $response;
+}
+
+// схематичная функция получения цены товара
+// учитывается временная цена и распродажи
+function getGoodPrice($goodId) {
+    /* база данных с акциями saleprices:
+    ид, название акции, тип скидки(%,+,-), размер скидки
+
+    база данных временных скидок timeprices:
+    ид, дата начала, дата окончания, тип скидки(%,+,-), размер скидки
+
+    база данных с товарами с акциями salegoods:
+    ид, ид товара, ид акции saleprice
+
+    база данных с товарами со скидками timegoods:
+    ид, ид товара, ид временной скидки timeprice
+    */
+    $goodPrice = <<<SQL
+SELECT price 
+FROM products
+WHERE id=$goodId
+SQL;
+    $salePrices = <<<SQL
+SELECT * 
+FROM salegoods,timegoods
+LEFT JOIN saleprices ON saleprices.id = salegoods.saleprice
+LEFT JOIN timeprices ON timeprices.id = timegoods.saleprice
+WHERE id=$goodId AND timeprices.StartDate <= now() AND timeprices.StopDate >= now()
+SQL;
+    foreach($salePrices as $salePrice) {
+        switch ($salePrice['type']) {
+            case '%':
+                $goodPrice = $goodPrice - ($goodPrice * $salePrice['size']/100);
+                break;
+            case '+':
+                $goodPrice = $goodPrice + $goodPrice;
+                break;
+            case '-':
+                $goodPrice = $goodPrice - $goodPrice;
+                break;
+        }
+    }
+
+    return $goodPrice;
 }

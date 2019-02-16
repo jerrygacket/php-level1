@@ -1,4 +1,4 @@
-					<tr>
+					<tr id="good_{{ID}}">
 						<td><img src="{{IMGSMALL}}"></td>
 						<td>{{NAME}}</td>
 						<td>{{PRICE}}</td>

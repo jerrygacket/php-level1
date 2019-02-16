@@ -83,8 +83,8 @@ function loginPage() {
             if (!authWithCredentials()) {
                 $vars["autherror"] = 'Неправильный логин/пароль';
             } else {
-                $vars["pagename"] = 'person';
-                $vars["personmenu"] = 'person';
+                $vars["pagename"] = (adminLoggedIn() ? 'admin' : 'person');
+                $vars["personmenu"] = (adminLoggedIn() ? 'admin' : 'person');
                 header('Location: /person');
             }
         }
@@ -113,25 +113,97 @@ function personPage() {
         $vars['username'] = $userInfo['user_name'];
         $vars["pagename"] = 'person';
         $vars["personmenu"] = 'person';
+        $vars["goodsbutton"] = '';
+        $vars["userorders"] = getUserOrdersPage();
     }
 
     return $vars;
 }
 
+function adminPage() {
+    if (alreadyLoggedIn() || checkAuthWithCookie()) {
+        $userInfo = getUserInfo();
+        $vars['userlogin'] = $userInfo['user_login'];
+        $vars['username'] = $userInfo['user_name'];
+        $vars["pagename"] = 'person';
+        $vars["personmenu"] = 'admin';
+        $vars["goodsbutton"] = renderPage('goods_button');
+        $vars["userorders"] = '';
+        $users = getAllUsers();
+        foreach ($users as $user) {
+            $vars["userorders"] .= getUserOrdersPage($user['id_user']);
+        }
+
+    }
+
+    return $vars;
+}
+
+function goodsPage() {
+    if (adminLoggedIn() || checkAuthWithCookie()) {
+        $userInfo = getUserInfo();
+        $vars['userlogin'] = $userInfo['user_login'];
+        $vars['username'] = $userInfo['user_name'];
+        $vars["pagename"] = 'goods';
+        $vars["personmenu"] = 'admin';
+        $vars["goods"] = '';
+        $vars["goods"] = getAllGoods();
+    } else {
+        header('Location: /');
+    }
+
+    return $vars;
+}
+
+function getUserOrdersPage($userId = '') {
+    $result = '';
+    $orders = getUserOrders($userId);
+    foreach ($orders as $order) {
+        $products['goods'] = getOrderProducts($order['order_number']);
+        foreach ($products['goods'] as &$good) {
+            $good['cost'] = $good['product_price'] * $good['product_count'];
+        }
+        $products['ordernumber'] = $order['order_number'];
+        $products['id'] = $order['id'];
+        $products['status'] = $order['status'];
+        $result .= renderPage('orderInfo',$products);
+    }
+
+    return $result;
+}
+
 function cartPage() {
-//    if (isset($_POST['getorder'])) {
-//        saveOrder();
-//    }
     $vars['pagetitle'] = 'Корзина';
     $vars['ordercost'] = 0;
+    $vars['getorder'] = [];
     $vars['goods'] = getGoods();
-    if (is_array($vars['goods'])) {
+    if (is_array($vars['goods']) && !empty($vars['goods'])) {
+        $vars['getorder'] = ['1']; // если есть товары, рисуем форму заказа
         foreach ($vars['goods'] as &$good) {
             $id = $good['id'];
             $good['count'] = $_SESSION['goods'][$id]['quantity'];
             $good['cost'] = $good['price'] * $good['count'];
             $vars['ordercost'] += $good['cost'];
         }
+    }
+
+    return $vars;
+}
+
+function getorderPage() {
+    $result['order'] = false;
+    if (isset($_POST['getorder'])) {
+        $result = saveOrder();
+    }
+    $vars['newuser'] = '';
+    $vars['olduser'] = '';
+    $vars['error'] = '';
+    if ($result['order']) {
+        $vars['pagetitle'] = 'Заказ оформлен';
+        $vars[$result['user']][0] = $result['userinfo'];
+    } else {
+        $vars['pagetitle'] = 'Заказ не оформлен';
+        $vars['error'] = $result['error'];
     }
 
     return $vars;

@@ -31,16 +31,6 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="/gallery">
-							Галерея
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="/calcs">
-							Калькуляторы
-						</a>
-					</li>
-					<li class="nav-item">
 						<a class="nav-link" href="/contacts">
 							Контакты
 						</a>

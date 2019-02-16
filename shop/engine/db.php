@@ -24,6 +24,7 @@ function getTableRow($sql)
 function executeQuery($sql){
     $db = mysqli_connect(HOST, USER, PASS, DB);
 	$result = mysqli_query($db, $sql);
+	print_r(mysqli_error($db));
     mysqli_close($db);
 	return $result;
 }
@@ -31,6 +32,13 @@ function executeQuery($sql){
 function sanitizeSQL($sql){
     $db = mysqli_connect(HOST, USER, PASS, DB);
     $result = mysqli_real_escape_string($db, (string)htmlspecialchars(strip_tags($sql)));
+    mysqli_close($db);
+    return $result;
+}
+
+function sanitizeArray(&$item){
+    $db = mysqli_connect(HOST, USER, PASS, DB);
+    $result = mysqli_real_escape_string($db, (string)htmlspecialchars(strip_tags($item)));
     mysqli_close($db);
     return $result;
 }

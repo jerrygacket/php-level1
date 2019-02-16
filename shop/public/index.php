@@ -4,25 +4,12 @@ require_once('../config/config.php');
 session_start();
 
 if (isset($_GET['action'])) {
-    $action = strtolower($_GET['action'] ?? '');
-    $cartFunction = $action . 'Cart';
-    if (is_callable($cartFunction)) {
-        if ($cartFunction()) {
-//            $response = ['result' => 1, 'data' => print_r($_SESSION,true)];
-            $response = ['result' => 1];
-        } else {
-            $response = [
-                'result' => 0,
-                'errorMessage' => 'ошибка работы с сессионными куками'
-            ];
-        }
-    } else {
-        $response = [
-            'result' => 0,
-            'errorMessage' => 'нет такой функции ' . $action
-        ];
-    }
-    echo json_encode($response);
+    doGetAction();
+    exit;
+}
+
+if (isset($_POST['action'])) {
+    doPostAction();
     exit;
 }
 

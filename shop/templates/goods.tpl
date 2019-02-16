@@ -7,17 +7,11 @@
 						<td></td>
 						<td>Название</td>
 						<td>Цена</td>
-						<td>Количество</td>
-						<td>Стоимость</td>
+						<td>Статус</td>
 						<td></td>
 						</tr>
 						{{GOODS}}
 					</table>
-					<p id="total">Итого: {{ORDERCOST}}</p>
-					<button class="btn btn-danger btn-rounded u-mt-20 " onclick="ajax_get('clr','','',getResponse)">Очистить корзину</button>
-			</div> <!-- END col-lg-6-->
-			<div class="col-lg-12 mt-5">
-				{{GETORDER}}
 			</div> <!-- END col-lg-6-->
 		</div> <!-- END row-->
 	</div> <!-- END container-->
